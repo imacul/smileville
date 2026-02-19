@@ -111,6 +111,8 @@ function App() {
           <directionalLight position={[0, 3, -8]} intensity={0.34} color="#738eaa" />
           <Suspense fallback={null}>
             <DentalModel />
+          </Suspense>
+          <Suspense fallback={null}>
             <Environment preset="night" blur={0.5} />
           </Suspense>
           <ContactShadows position={[0, -2.6, 0]} opacity={0.55} scale={17} blur={2.6} far={8} />
