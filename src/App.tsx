@@ -1,6 +1,6 @@
 import { Suspense, useEffect, useState } from 'react';
 import { Canvas } from '@react-three/fiber';
-import { ContactShadows, Environment, OrbitControls } from '@react-three/drei';
+import { ContactShadows, Environment, OrbitControls, useProgress } from '@react-three/drei';
 import { FiCheck, FiInfo, FiMoon, FiSun, FiUser, FiX } from 'react-icons/fi';
 import { DentalModel } from './components/DentalModel';
 import * as THREE from 'three';
@@ -19,6 +19,35 @@ const getInitialTheme = (): Theme => {
 
   return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
 };
+
+function LoadingOverlay({ isDark }: { isDark: boolean }) {
+  const { active, progress, loaded, total } = useProgress();
+
+  if (!active) {
+    return null;
+  }
+
+  return (
+    <div className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center">
+      <div
+        className={`w-[min(340px,85vw)] rounded-xl border p-4 shadow-xl backdrop-blur-md ${
+          isDark ? 'bg-slate-950/84 border-slate-700/70' : 'bg-white/86 border-slate-300/70'
+        }`}
+      >
+        <p className={`text-sm font-semibold ${isDark ? 'text-slate-100' : 'text-slate-800'}`}>Loading 3D model...</p>
+        <div className={`mt-3 h-2 w-full overflow-hidden rounded-full ${isDark ? 'bg-slate-800' : 'bg-slate-200'}`}>
+          <div
+            className={`h-full rounded-full transition-all duration-300 ${isDark ? 'bg-teal-400' : 'bg-teal-600'}`}
+            style={{ width: `${Math.min(100, Math.max(2, progress))}%` }}
+          />
+        </div>
+        <p className={`mt-2 text-xs ${isDark ? 'text-slate-300' : 'text-slate-600'}`}>
+          {Math.round(progress)}% ({loaded}/{total})
+        </p>
+      </div>
+    </div>
+  );
+}
 
 function App() {
   const [isPatientInfoOpen, setIsPatientInfoOpen] = useState(false);
@@ -119,6 +148,8 @@ function App() {
           <OrbitControls enableDamping={true} autoRotate={false} />
         </Canvas>
       </div>
+
+      <LoadingOverlay isDark={isDark} />
 
       <div
         className="pointer-events-none absolute inset-0 z-[1] bg-[radial-gradient(circle_at_50%_38%,rgba(255,255,255,0.02)_0%,rgba(255,255,255,0)_44%,rgba(2,8,18,0.62)_100%)]"

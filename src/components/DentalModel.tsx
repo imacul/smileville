@@ -3,7 +3,7 @@ import { useGLTF, Center } from '@react-three/drei';
 import * as THREE from 'three';
 
 export function DentalModel() {
-    const { scene } = useGLTF('/dental_mold_3d_scan.glb');
+    const { scene } = useGLTF('/dental_mold_3d_scan.glb', '/draco-gltf/');
     const ref = useRef<THREE.Group>(null);
 
     useLayoutEffect(() => {
@@ -36,4 +36,5 @@ export function DentalModel() {
     );
 }
 
-useGLTF.preload('/dental_mold_3d_scan.glb');
+useGLTF.setDecoderPath('/draco-gltf/');
+useGLTF.preload('/dental_mold_3d_scan.glb', '/draco-gltf/');
