@@ -1,6 +1,6 @@
 import { Suspense, useEffect, useState } from 'react';
 import { Canvas } from '@react-three/fiber';
-import { ContactShadows, Environment, OrbitControls, useProgress } from '@react-three/drei';
+import { AdaptiveDpr, ContactShadows, Environment, OrbitControls, useProgress } from '@react-three/drei';
 import { FiCheck, FiInfo, FiMoon, FiSun, FiUser, FiX } from 'react-icons/fi';
 import { DentalModel } from './components/DentalModel';
 import * as THREE from 'three';
@@ -54,11 +54,40 @@ function App() {
   const [theme, setTheme] = useState<Theme>(getInitialTheme);
   const [isApproved, setIsApproved] = useState(false);
   const [isApproveAnimating, setIsApproveAnimating] = useState(false);
+  const [isMobile, setIsMobile] = useState(() => {
+    if (typeof window === 'undefined') {
+      return false;
+    }
+
+    return window.matchMedia('(max-width: 900px), (pointer: coarse)').matches;
+  });
   const isDark = theme === 'dark';
 
   useEffect(() => {
     window.localStorage.setItem('smileville-theme', theme);
   }, [theme]);
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(max-width: 900px), (pointer: coarse)');
+    const updateMobileState = () => setIsMobile(mediaQuery.matches);
+
+    updateMobileState();
+    if (typeof mediaQuery.addEventListener === 'function') {
+      mediaQuery.addEventListener('change', updateMobileState);
+    } else {
+      mediaQuery.addListener(updateMobileState);
+    }
+    window.addEventListener('orientationchange', updateMobileState);
+
+    return () => {
+      if (typeof mediaQuery.removeEventListener === 'function') {
+        mediaQuery.removeEventListener('change', updateMobileState);
+      } else {
+        mediaQuery.removeListener(updateMobileState);
+      }
+      window.removeEventListener('orientationchange', updateMobileState);
+    };
+  }, []);
 
   useEffect(() => {
     if (!isApproveAnimating) {
@@ -117,35 +146,48 @@ function App() {
       {/* 3D Scene */}
       <div className="absolute inset-0 z-0">
         <Canvas
-          shadows
-          dpr={[1, 2]}
+          shadows={!isMobile}
+          dpr={isMobile ? [0.75, 1.1] : [1, 2]}
+          frameloop={isMobile ? 'demand' : 'always'}
+          gl={{
+            alpha: false,
+            antialias: !isMobile,
+            depth: true,
+            powerPreference: 'high-performance',
+            preserveDrawingBuffer: false,
+            stencil: false,
+          }}
+          performance={{ min: 0.5 }}
           camera={{ position: [0, 5, 10], fov: 45 }}
           className="w-full h-full"
           onCreated={({ gl }) => {
             gl.toneMapping = THREE.ACESFilmicToneMapping;
-            gl.toneMappingExposure = 0.7;
+            gl.toneMappingExposure = isMobile ? 0.66 : 0.7;
           }}
         >
+          <AdaptiveDpr pixelated />
           <color attach="background" args={['#0f1a27']} />
-          <ambientLight intensity={0.14} />
-          <hemisphereLight args={['#8ea0b6', '#182434', 0.28]} />
+          <ambientLight intensity={isMobile ? 0.16 : 0.14} />
+          <hemisphereLight args={['#8ea0b6', '#182434', isMobile ? 0.24 : 0.28]} />
           <directionalLight
             position={[7, 10, 2]}
-            intensity={1.05}
-            castShadow
-            shadow-mapSize={[2048, 2048]}
+            intensity={isMobile ? 0.92 : 1.05}
+            castShadow={!isMobile}
+            shadow-mapSize={isMobile ? [768, 768] : [2048, 2048]}
             shadow-bias={-0.0003}
           />
-          <directionalLight position={[-6, 4, -5]} intensity={0.35} color="#8fa6c2" />
-          <directionalLight position={[0, 3, -8]} intensity={0.34} color="#738eaa" />
+          <directionalLight position={[-6, 4, -5]} intensity={isMobile ? 0.28 : 0.35} color="#8fa6c2" />
+          <directionalLight position={[0, 3, -8]} intensity={isMobile ? 0.26 : 0.34} color="#738eaa" />
           <Suspense fallback={null}>
             <DentalModel />
           </Suspense>
-          <Suspense fallback={null}>
-            <Environment preset="night" blur={0.5} />
-          </Suspense>
-          <ContactShadows position={[0, -2.6, 0]} opacity={0.55} scale={17} blur={2.6} far={8} />
-          <OrbitControls enableDamping={true} autoRotate={false} />
+          {!isMobile && (
+            <Suspense fallback={null}>
+              <Environment preset="night" blur={0.5} />
+            </Suspense>
+          )}
+          {!isMobile && <ContactShadows position={[0, -2.6, 0]} opacity={0.55} scale={17} blur={2.6} far={8} />}
+          <OrbitControls enableDamping={!isMobile} autoRotate={false} makeDefault rotateSpeed={isMobile ? 0.78 : 1} />
         </Canvas>
       </div>
 

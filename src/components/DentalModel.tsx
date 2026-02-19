@@ -17,6 +17,8 @@ export function DentalModel() {
             if ((child as THREE.Mesh).isMesh) {
                 const mesh = child as THREE.Mesh;
                 const oldMaterial = mesh.material;
+                mesh.geometry.computeVertexNormals();
+                mesh.geometry.normalizeNormals();
                 mesh.material = new THREE.MeshStandardMaterial(materialSettings);
                 if (Array.isArray(oldMaterial)) {
                     oldMaterial.forEach((material) => material.dispose());
