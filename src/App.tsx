@@ -205,7 +205,10 @@ function App() {
             isDark ? 'bg-slate-950/80 border-slate-700/70' : 'bg-white/88 border-slate-300/60'
           }`}
         >
-          <img src="/smileville-logo.svg" alt="SmileVille Ortho-Dental Limited" className="h-14 w-auto" />
+          <div className="flex items-center gap-3">
+            <img src="/favicon.svg" alt="DDL icon" className="h-9 w-9" />
+            <h1 className={`text-xl font-semibold ${isDark ? 'text-slate-100' : 'text-slate-800'}`}>DDL Digital Portal</h1>
+          </div>
           <div className="flex items-center gap-2">
             <button
               type="button"

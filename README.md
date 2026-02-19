@@ -1,4 +1,4 @@
-# SmileVille Portal
+# DDL Digital Portal
 
 Interactive dental review UI built with React, TypeScript, and Three.js.  
 It is designed for quick case review with a clinically visible 3D model, patient context, and approve/request-change actions.
